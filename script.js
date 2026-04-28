@@ -1,274 +1,138 @@
-const STORAGE_KEY = "attendance_shortage_data_v1";
-const REQUIRED_PERCENTAGE = 75;
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const features = [
+  'Nothing Dot font as central typography',
+  'Light mode default with dark mode toggle',
+  'Custom cursor (dot or crosshair)',
+  'About section with mid-thought opener',
+  'Projects panel with story-driven case studies',
+  'Notes section (public second brain)',
+  'Platform links written in your voice',
+  'Version history of self (retrospective changelog)',
+  'Guestbook (physical guestbook feeling)',
+  "Now page (what you're currently into)",
+  'Reading / listening shelf',
+  'Uses / stack page',
+  'Site manifesto',
+  'Micro-interactions throughout',
+  'Time-aware greetings',
+  'Intentional load experience',
+  'Open graph image',
+  '404 page as a feature',
+  'Colophon',
+  'Footer personality line',
+  'Quiet visitor counter',
+  'Contact without a form',
+  'Honest incompleteness (living document feeling)'
+];
 
-const state = loadState();
+const stack = [
+  ['Framework', 'Next.js 14 App Router + TypeScript'],
+  ['Styling', 'Tailwind CSS'],
+  ['Animation', 'Framer Motion with LazyMotion/domAnimation'],
+  ['Database', 'Supabase (guestbook)'],
+  ['Cache / Counter', 'Upstash Redis'],
+  ['Content', 'Velite or next-mdx-remote for MDX'],
+  ['Deployment', 'Vercel'],
+  ['OG Images', '@vercel/og on edge runtime'],
+  ['Theme', 'next-themes with cookie storage'],
+  ['Validation', 'Zod on all API routes']
+];
 
-const subjectForm = document.getElementById("subject-form");
-const subjectNameInput = document.getElementById("subject-name");
-const subjectDurationInput = document.getElementById("subject-duration");
-const daysGrid = document.getElementById("days-grid");
-const subjectsList = document.getElementById("subjects-list");
-const todayLabel = document.getElementById("today-label");
-const todayClasses = document.getElementById("today-classes");
-const summaryBody = document.getElementById("summary-body");
-const overallRow = document.getElementById("overall-row");
-const resetBtn = document.getElementById("reset-btn");
-
-renderDayCheckboxes();
-wireEvents();
-renderAll();
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return { subjects: [], attendance: {} };
-    }
-    const parsed = JSON.parse(raw);
-    return {
-      subjects: Array.isArray(parsed.subjects) ? parsed.subjects : [],
-      attendance: parsed.attendance && typeof parsed.attendance === "object" ? parsed.attendance : {}
-    };
-  } catch {
-    return { subjects: [], attendance: {} };
+const problems = [
+  {
+    title: 'Load Experience Hurting Core Web Vitals',
+    solution: 'Load and parse all content first; reveal using CSS animation only. Never gate DOM render behind JavaScript.'
+  },
+  {
+    title: 'Framer Motion Bundle Size',
+    solution: 'Use LazyMotion + domAnimation and reserve JS animation for route transitions only.'
+  },
+  {
+    title: 'Guestbook on Critical Render Path',
+    solution: "Use ISR and revalidatePath('/guestbook') from POST to keep data fresh without SSR cost."
+  },
+  {
+    title: 'Guestbook as Attack Surface',
+    solution: 'Validate with Zod, cap length to 280, sanitize server-side, normalize Unicode, and rate-limit by IP.'
+  },
+  {
+    title: 'Visitor Counter Bot Inflation',
+    solution: 'Increment once per IP per 24 hours via Upstash middleware.'
+  },
+  {
+    title: 'Dark Mode Flash on Reload',
+    solution: 'Use cookie-backed theme state so server can render correct mode immediately.'
+  },
+  {
+    title: 'MDX Build Time Scaling',
+    solution: 'Compile only published content and keep drafts out of build globs.'
+  },
+  {
+    title: 'Micro-Interactions Performance Death',
+    solution: 'Use CSS transitions broadly; if JS animation is needed, animate only transform/opacity.'
   }
+];
+
+const principles = [
+  'Thin air movement — transitions feel like air, never page flips',
+  'Honest incompleteness — living document, never “finished”',
+  'Voice over polish — personality first',
+  'Intentional whitespace — emptiness is a decision',
+  'Quiet, never loud — no visual shouting',
+  'Static by default — dynamic only where needed'
+];
+
+const THEME_KEY = 'portfolio_theme_v1';
+
+function render() {
+  document.getElementById('feature-list').innerHTML = features.map((item) => `<li>${item}</li>`).join('');
+  document.getElementById('stack-table').innerHTML = stack.map(([layer, decision]) => `<tr><td>${layer}</td><td>${decision}</td></tr>`).join('');
+  document.getElementById('problems-list').innerHTML = problems.map((item, idx) => `
+    <details ${idx === 0 ? 'open' : ''}>
+      <summary>${item.title}</summary>
+      <p class="problem-content">${item.solution}</p>
+    </details>
+  `).join('');
+  document.getElementById('principles-list').innerHTML = principles.map((item) => `<li>${item}</li>`).join('');
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function applyGreeting() {
+  const hour = new Date().getHours();
+  const message = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
+  document.getElementById('greeting').textContent = message;
 }
 
-function renderDayCheckboxes() {
-  daysGrid.innerHTML = "";
-  DAYS.forEach((day, index) => {
-    const label = document.createElement("label");
-    label.className = "day-check";
+function setupThemeToggle() {
+  const root = document.documentElement;
+  const button = document.getElementById('theme-toggle');
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = String(index);
+  const setTheme = (theme) => {
+    root.setAttribute('data-theme', theme);
+    button.textContent = theme === 'light' ? 'DARK' : 'LIGHT';
+    localStorage.setItem(THEME_KEY, theme);
+  };
 
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(day.slice(0, 3)));
-    daysGrid.appendChild(label);
+  setTheme(localStorage.getItem(THEME_KEY) || 'light');
+  button.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    setTheme(next);
   });
 }
 
-function wireEvents() {
-  subjectForm.addEventListener("submit", onAddSubject);
-  resetBtn.addEventListener("click", onResetSession);
-}
+function setupCursor() {
+  if (!window.matchMedia('(pointer: fine)').matches) return;
+  const cursor = document.getElementById('cursor');
 
-function onAddSubject(event) {
-  event.preventDefault();
-
-  const name = subjectNameInput.value.trim();
-  const duration = Number(subjectDurationInput.value);
-  const selectedDays = [...daysGrid.querySelectorAll("input[type='checkbox']")]
-    .filter((input) => input.checked)
-    .map((input) => Number(input.value));
-
-  if (!name) {
-    alert("Please enter a subject name.");
-    return;
-  }
-  if (selectedDays.length === 0) {
-    alert("Please select at least one class day.");
-    return;
-  }
-
-  state.subjects.push({
-    id: crypto.randomUUID(),
-    name,
-    days: selectedDays,
-    duration
+  window.addEventListener('mousemove', (event) => {
+    cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
   });
 
-  subjectForm.reset();
-  saveState();
-  renderAll();
-}
-
-function onResetSession() {
-  const yes = confirm("This will remove all subjects and attendance data. Continue?");
-  if (!yes) {
-    return;
-  }
-
-  state.subjects = [];
-  state.attendance = {};
-  saveState();
-  renderAll();
-}
-
-function removeSubject(subjectId) {
-  state.subjects = state.subjects.filter((subject) => subject.id !== subjectId);
-  Object.keys(state.attendance).forEach((key) => {
-    if (key.endsWith(`|${subjectId}`)) {
-      delete state.attendance[key];
-    }
-  });
-  saveState();
-  renderAll();
-}
-
-function getTodayDateKey() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function setTodayStatus(subjectId, status) {
-  const key = `${getTodayDateKey()}|${subjectId}`;
-  state.attendance[key] = status;
-  saveState();
-  renderAll();
-}
-
-function renderAll() {
-  renderSubjects();
-  renderTodayClasses();
-  renderSummary();
-}
-
-function renderSubjects() {
-  subjectsList.innerHTML = "";
-  if (state.subjects.length === 0) {
-    subjectsList.innerHTML = '<li class="empty">No subjects added yet.</li>';
-    return;
-  }
-
-  state.subjects.forEach((subject) => {
-    const li = document.createElement("li");
-    const dayText = subject.days.map((day) => DAYS[day].slice(0, 3)).join(", ");
-    const info = document.createElement("div");
-    info.textContent = `${subject.name} • ${subject.duration === 2 ? "100 min" : "50 min"} • ${dayText}`;
-
-    const remove = document.createElement("button");
-    remove.className = "remove-btn";
-    remove.textContent = "Remove";
-    remove.addEventListener("click", () => removeSubject(subject.id));
-
-    li.appendChild(info);
-    li.appendChild(remove);
-    subjectsList.appendChild(li);
+  document.querySelectorAll('button, summary').forEach((el) => {
+    el.addEventListener('mouseenter', () => cursor.style.scale = '1.2');
+    el.addEventListener('mouseleave', () => cursor.style.scale = '1');
   });
 }
 
-function renderTodayClasses() {
-  const now = new Date();
-  const todayDay = now.getDay();
-  const todayString = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  });
-
-  todayLabel.textContent = `Today: ${todayString}`;
-  todayClasses.innerHTML = "";
-
-  const classes = state.subjects.filter((subject) => subject.days.includes(todayDay));
-  if (classes.length === 0) {
-    todayClasses.innerHTML = '<p class="empty">No classes scheduled for today.</p>';
-    return;
-  }
-
-  const dateKey = getTodayDateKey();
-  classes.forEach((subject) => {
-    const wrap = document.createElement("div");
-    wrap.className = "today-item";
-
-    const label = document.createElement("div");
-    label.innerHTML = `<strong>${subject.name}</strong><br><small>${subject.duration === 2 ? "100 min = 2 classes" : "50 min = 1 class"}</small>`;
-
-    const actions = document.createElement("div");
-    actions.className = "status-actions";
-
-    [
-      { value: "attended", text: "Attended" },
-      { value: "missed", text: "Missed" },
-      { value: "holiday", text: "Holiday" }
-    ].forEach((option) => {
-      const btn = document.createElement("button");
-      btn.className = "status-btn";
-      btn.textContent = option.text;
-      const recordKey = `${dateKey}|${subject.id}`;
-      if (state.attendance[recordKey] === option.value) {
-        btn.classList.add("active");
-      }
-      btn.addEventListener("click", () => setTodayStatus(subject.id, option.value));
-      actions.appendChild(btn);
-    });
-
-    wrap.appendChild(label);
-    wrap.appendChild(actions);
-    todayClasses.appendChild(wrap);
-  });
-}
-
-function renderSummary() {
-  summaryBody.innerHTML = "";
-
-  if (state.subjects.length === 0) {
-    summaryBody.innerHTML = '<tr><td colspan="6" class="empty">Add subjects to see summary.</td></tr>';
-    overallRow.innerHTML = "";
-    return;
-  }
-
-  let overallTotal = 0;
-  let overallAttended = 0;
-
-  state.subjects.forEach((subject) => {
-    const { totalUnits, attendedUnits } = computeSubjectSummary(subject);
-    overallTotal += totalUnits;
-    overallAttended += attendedUnits;
-
-    const percentage = totalUnits === 0 ? 0 : (attendedUnits / totalUnits) * 100;
-    const shortage = percentage < REQUIRED_PERCENTAGE;
-    const canSkip = ((attendedUnits / (totalUnits + subject.duration)) * 100) >= REQUIRED_PERCENTAGE;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${subject.name}</td>
-      <td>${totalUnits}</td>
-      <td>${attendedUnits}</td>
-      <td>${percentage.toFixed(1)}%</td>
-      <td class="${shortage ? "status-shortage" : "status-ok"}">${shortage ? "Shortage" : "Safe"}</td>
-      <td class="${canSkip ? "skip-yes" : "skip-no"}">${canSkip ? "Yes" : "No"}</td>
-    `;
-    summaryBody.appendChild(tr);
-  });
-
-  const overallPercentage = overallTotal === 0 ? 0 : (overallAttended / overallTotal) * 100;
-  overallRow.innerHTML = `
-    <th>Overall</th>
-    <th>${overallTotal}</th>
-    <th>${overallAttended}</th>
-    <th>${overallPercentage.toFixed(1)}%</th>
-    <th class="${overallPercentage < REQUIRED_PERCENTAGE ? "status-shortage" : "status-ok"}">${overallPercentage < REQUIRED_PERCENTAGE ? "Shortage" : "Safe"}</th>
-    <th>-</th>
-  `;
-}
-
-function computeSubjectSummary(subject) {
-  let totalUnits = 0;
-  let attendedUnits = 0;
-
-  Object.entries(state.attendance).forEach(([key, status]) => {
-    const [, subjectId] = key.split("|");
-    if (subjectId !== subject.id || status === "holiday") {
-      return;
-    }
-
-    totalUnits += subject.duration;
-    if (status === "attended") {
-      attendedUnits += subject.duration;
-    }
-  });
-
-  return { totalUnits, attendedUnits };
-}
+render();
+applyGreeting();
+setupThemeToggle();
+setupCursor();

@@ -1,96 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance Shortage Calculator</title>
+  <title>Personal Portfolio — Nothing-Inspired System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <main class="container">
-      <header class="topbar">
-        <div class="brand">
-          <span class="brand-dot"></span>
-          <span>Attendance OS</span>
-        </div>
-        <div class="nav-pill">75% Minimum Policy</div>
-      </header>
+  <div id="cursor" class="cursor" aria-hidden="true"></div>
 
-      <section class="hero">
-        <span class="hero-badge">Smart Attendance Tracker</span>
-        <h1>Meet your shortage<br />prevention dashboard.</h1>
-        <p class="subtitle">Add subjects, mark today as attended/missed/holiday, and instantly know if you can skip your next class safely.</p>
-      </section>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-led"></span>
+      <span>PERSONAL OS // NOTHING MODE</span>
+    </div>
+    <div class="header-actions">
+      <span id="greeting" class="greeting">Good evening.</span>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">DARK</button>
+    </div>
+  </header>
 
-      <section class="card">
-        <h2>Add Subject</h2>
-        <form id="subject-form" class="subject-form">
-          <label>
-            Subject Name
-            <input id="subject-name" type="text" placeholder="e.g. Operating Systems" required />
-          </label>
+  <main class="layout">
+    <section class="hero panel reveal">
+      <p class="micro">LIVING DOCUMENT · LAST UPDATED INTENT: SYSTEM + STORY + EXECUTION</p>
+      <h1>Personal Portfolio<br/>Master Reference</h1>
+      <p class="lead">This is a Nothing-inspired front-end system: dot-matrix typographic voice, minimal surfaces, quiet motion, and honest incompleteness by design.</p>
+    </section>
 
-          <fieldset>
-            <legend>Class Days</legend>
-            <div class="days-grid" id="days-grid"></div>
-          </fieldset>
+    <section class="panel reveal">
+      <div class="section-head">
+        <h2>23 Features</h2>
+        <span class="chip">Core Product DNA</span>
+      </div>
+      <ol class="feature-list" id="feature-list"></ol>
+    </section>
 
-          <label>
-            Class Duration
-            <select id="subject-duration" required>
-              <option value="1">50 min (counts as 1 class)</option>
-              <option value="2">100 min (counts as 2 classes)</option>
-            </select>
-          </label>
+    <section class="panel reveal">
+      <div class="section-head">
+        <h2>Stack Decisions</h2>
+        <span class="chip">Final</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Decision</th></tr></thead>
+          <tbody id="stack-table"></tbody>
+        </table>
+      </div>
+    </section>
 
-          <button type="submit">Add Subject</button>
-        </form>
+    <section class="panel reveal">
+      <div class="section-head">
+        <h2>Route Architecture</h2>
+        <span class="chip">Map</span>
+      </div>
+      <pre class="route-map">Load Experience (entry gate)
+└── / (root)
+    ├── /about
+    │   ├── /projects
+    │   │   └── /projects/:slug
+    │   └── /notes
+    │       └── /notes/:slug
+    ├── /now
+    │   ├── /reading
+    │   └── /links
+    ├── /guestbook
+    ├── /uses
+    └── /colophon
+        └── /version
 
-        <div class="subjects-list-wrap">
-          <h3>Subjects</h3>
-          <ul id="subjects-list" class="subjects-list"></ul>
-        </div>
-      </section>
+Special Routes
+├── /404
+├── /og-image
+├── /contact
+└── /manifesto</pre>
+    </section>
 
-      <section class="card">
-        <h2>Today's Classes</h2>
-        <p id="today-label" class="today-label"></p>
-        <div id="today-classes" class="today-classes"></div>
-      </section>
+    <section class="panel reveal">
+      <div class="section-head">
+        <h2>Problems / Solutions</h2>
+        <span class="chip">Operational Notes</span>
+      </div>
+      <div id="problems-list" class="problems"></div>
+    </section>
 
-      <section class="card">
-        <h2>Attendance Summary</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Subject</th>
-                <th>Total Classes</th>
-                <th>Attended Classes</th>
-                <th>Attendance %</th>
-                <th>Status</th>
-                <th>Can Skip Next?</th>
-              </tr>
-            </thead>
-            <tbody id="summary-body"></tbody>
-            <tfoot>
-              <tr id="overall-row"></tr>
-            </tfoot>
-          </table>
-        </div>
-      </section>
+    <section class="panel reveal">
+      <div class="section-head">
+        <h2>Design Principles</h2>
+        <span class="chip">Non-negotiables</span>
+      </div>
+      <ul class="principles" id="principles-list"></ul>
+    </section>
+  </main>
 
-      <section class="card danger-zone">
-        <h2>End Session</h2>
-        <p>Use this when your semester/session ends. It will delete all subjects and attendance data.</p>
-        <button id="reset-btn" class="danger">Clear All Data & Start Next Session</button>
-      </section>
-    </main>
-  </div>
+  <footer class="site-footer">
+    <p>quiet, never loud — static by default — voice over polish</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
